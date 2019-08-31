@@ -2,6 +2,8 @@ package parser.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -90,7 +92,7 @@ public class ParserTest extends TestCase {
 		Parser.create().parse(
 				"{" +
 						"name : \"Senthil\"," + 
-						"married : true," +
+						"Employed : true," +
 						"favourites : [\"TDD\", \"OOPS\"]" + 
 				"}")
 		.ifSuccess(v -> v
@@ -100,6 +102,29 @@ public class ParserTest extends TestCase {
 						.isArray(__v -> __v
 								.isString(___v -> System.out.printf("\t String Value (%s)", ___v))
 								.isBool(___v -> System.out.printf("\t Boolean Value (%s)", ___v)))))
+		.ifFailure(System.out::println);
+	}
+	
+	public void testJSONArray() throws Exception {
+		
+		Parser.create().parse("["
+				+ "{ \"name\" :\"Arun\","
+				+ "  \"age\"  : 10"
+				+ "}, {"
+				+ "\"name\"   : \"Akash\","
+				+ "\"age\"    : 14"
+				+ "}"
+				+ "]")
+		.ifSuccess(v -> v
+				.isArray(_v -> _v
+						.isJSON((key, __v) -> 
+						key.isString(_k -> {
+							if (_k.equals("name")) {
+								__v.isString(System.out::println);
+							} else if (_k.equals("age")) {
+								__v.isInteger(System.out::println);
+							}
+						}))))
 		.ifFailure(System.out::println);
 	}
 	

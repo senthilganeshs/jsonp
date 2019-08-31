@@ -194,6 +194,7 @@ public interface Parser {
 				final List<Value> values = new ArrayList<>();
 				final String inner = token.substring(1, token.length() - 1);
 				int nb = 0;
+				int nbr = 0;
 				int s = 0;
 				for (int i = 0; i < inner.length(); i ++) {
 					if (Character.isWhitespace(inner.charAt(i))) {
@@ -202,17 +203,23 @@ public interface Parser {
 						nb ++;
 					} else if (inner.charAt(i) ==']') {
 						nb --;
+					} else if (inner.charAt(i) == '{') {
+						nbr ++ ;
+					}  else if (inner.charAt(i) == '}') {
+						nbr --;
 					} else if (inner.charAt(i) ==',') {
-						if (nb == 0) {
+						if (nb == 0 && nbr == 0) {
 							values.add(asValue(inner.substring(s, i)));
 							s = i + 1;
 						}
 					}
+
+					if (i == inner.length() - 1) {
+						if (nbr == 0 && nb == 0) {
+							Parser.ALL.parse(inner.substring(s, i + 1).trim()).ifSuccess(values::add);							
+						}
+					}					
 				}
-
-				if (s < inner.length() - 1)
-					values.add(asValue(inner.substring(s, inner.length())));
-
 				return Either.succ(Value.arr(values));
 			}
 
