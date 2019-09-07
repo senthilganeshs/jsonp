@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -121,7 +122,7 @@ public interface Parser {
         @Override
         public Either<Value, JSONParserException> parse(String document) {
             try {
-                return Either.succ(Value.integer(Integer.parseInt(document)));
+                return Either.succ(Value.integer(Long.parseLong(document)));
             } catch (NumberFormatException e) {
                 return other.parse(document);
             }
@@ -196,6 +197,8 @@ public interface Parser {
                 int nb = 0;
                 int nbr = 0;
                 int s = 0;
+                final AtomicBoolean isOpen = new AtomicBoolean(false);
+                int quotes = 0;
                 for (int i = 0; i < inner.length(); i++) {
                     if (Character.isWhitespace(inner.charAt(i))) {
                         continue; // skip whitespace.
@@ -208,14 +211,19 @@ public interface Parser {
                     } else if (inner.charAt(i) == '}') {
                         nbr--;
                     } else if (inner.charAt(i) == ',') {
-                        if (nb == 0 && nbr == 0) {
+                        if (nb == 0 && nbr == 0 && quotes == 0) {
                             values.add(asValue(inner.substring(s, i)));
                             s = i + 1;
                         }
+                    } else if (inner.charAt(i) =='"') {
+                        if (isOpen.compareAndSet(false, true))
+                            quotes++;
+                        else if (isOpen.compareAndSet(true, false))
+                            quotes--;
                     }
 
                     if (i == inner.length() - 1) {
-                        if (nbr == 0 && nb == 0) {
+                        if (nbr == 0 && nb == 0 && quotes == 0) {
                             Parser.ALL.parse(inner.substring(s, i + 1).trim()).ifSuccess(
                                 values::add);
                         }
@@ -256,6 +264,8 @@ public interface Parser {
                 int vs = 0;
                 int ks = 0;
                 String key = "";
+                final AtomicBoolean isOpen = new AtomicBoolean(false);
+                int quotes = 0;
                 for (int i = 0; i < inner.length(); i++) {
                     if (Character.isWhitespace(inner.charAt(i))) {
                         // skip reference
@@ -267,21 +277,31 @@ public interface Parser {
                         nb++;
                     } else if (inner.charAt(i) == ']') {
                         nb--;
+                    } else if (inner.charAt(i) =='"') {
+                        if (isOpen.compareAndSet(false, true))
+                            quotes++;
+                        else if (isOpen.compareAndSet(true, false))
+                            quotes--;
                     } else if (inner.charAt(i) == ',') {
-                        if (nbr == 0 && nb == 0) {
+                        if (nbr == 0 && nb == 0 && quotes == 0) {
                             ks = i + 1;
                             final String _key = key;
                             Parser.ALL.parse(inner.substring(vs, i).trim()).ifSuccess(
-                                value -> map.put(Value.string(_key), value));
+                                value -> {
+                                    if (!_key.isEmpty()) {
+                                        map.put(Value.string(_key), value);
+                                    }
+                                });
+                            key = "";
                         }
                     } else if (inner.charAt(i) == ':') {
-                        if (nbr == 0 && nb == 0) {
+                        if (nbr == 0 && nb == 0 && quotes == 0) {
                             key = inner.substring(ks, i).trim();
                             vs = i + 1;
                         }
                     }
                     if (i == inner.length() - 1) {
-                        if (nbr == 0 && nb == 0) {
+                        if (nbr == 0 && nb == 0 && quotes == 0) {
                             final String _key = key;
                             Parser.ALL.parse(inner.substring(vs, i + 1).trim()).ifSuccess(
                                 value -> map.put(Value.string(_key), value));
@@ -312,7 +332,7 @@ public interface Parser {
             return this;
         }
 
-        default Value isInteger(final Consumer<Integer> action) {
+        default Value isInteger(final Consumer<Long> action) {
             return this;
         }
 
@@ -344,7 +364,7 @@ public interface Parser {
             return new BoolValue(value);
         }
 
-        public static Value integer(final int value) {
+        public static Value integer(final long value) {
             return new IntValue(value);
         }
 
@@ -365,14 +385,14 @@ public interface Parser {
         }
 
         final static class IntValue implements Value {
-            private final int value;
+            private final long value;
 
-            IntValue(final int value) {
+            IntValue(final long value) {
                 this.value = value;
             }
 
             @Override
-            public Value isInteger(final Consumer<Integer> action) {
+            public Value isInteger(final Consumer<Long> action) {
                 action.accept(value);
                 return this;
             }

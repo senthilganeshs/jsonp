@@ -10,14 +10,16 @@ import parser.json.Parser.Value;
 public interface Generator {
 
     String generate (final Value value);
-    
-    
+
     public static Generator create() {
-        return new Simple();
+        return Simple.INSTANCE;
     }
     
-    final static class Simple implements Generator {
+    enum Simple implements Generator {
 
+        INSTANCE
+        ;
+        
         @Override
         public String generate(final Value value) {
             final StringBuilder bld = new StringBuilder();
@@ -31,9 +33,12 @@ public interface Generator {
                 return bld.toString();
             
             final List<String> array = new ArrayList<>();
-            value.isArray(v -> array.add(generate(v)));
+            final boolean isArray = (value instanceof Value.ArrayValue);
+            value.isArray(v -> {
+                array.add(generate(v));   
+            });
             
-            if (!array.isEmpty()) {
+            if (isArray) {
                 bld.append("[");
                 array.stream().reduce((lhs, rhs) -> lhs + "," + rhs).ifPresent(bld::append);
                 bld.append("]");
@@ -41,9 +46,12 @@ public interface Generator {
             }
             
             final Map<String, String> map = new LinkedHashMap<>();
-            value.isJSON((k, v) -> map.put(generate(k), generate(v)));
+            final boolean isMap = (value instanceof Value.JSONValue);
+            value.isJSON((k, v) -> {
+                map.put(generate(k), generate(v));                
+            });
             
-            if (!map.isEmpty()) {
+            if (isMap) {
                 bld.append("{");
                 map.entrySet().stream()
                 .map(e -> e.getKey() + ":" + e.getValue())
