@@ -8,6 +8,7 @@
 
 	<name>purejson</name>
 	<url>http://maven.apache.org</url>
+	<description>PureJSON is a simple JSON parser exposing pure object APIs for parsing json documents</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -119,6 +120,25 @@
 		</profile>
 
 	</profiles>
+	
+	<developers>
+		<developer>
+			<id>senthilganeshs</id>
+			<name>Senthil Ganesh S</name>
+			<email>sesas.senthil@gmail.com</email>
+			<organization>Informatica</organization>
+			<roles>
+				<role>Java Developer</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>GPL-v3.0</name>
+			<url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+		</license>
+	</licenses>
     
     <distributionManagement>
     	<snapshotRepository>
