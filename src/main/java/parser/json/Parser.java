@@ -436,7 +436,8 @@ public interface Parser {
             
             @Override
             public Value isJSONKey(final Value key, final Consumer<Value> action) {
-                action.accept(map.get(key));
+                if (key != null && map.containsKey(key))
+                    action.accept(map.get(key));
                 return this;
             }
         }
