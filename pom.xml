@@ -3,7 +3,7 @@
 
 	<groupId>purejson.parser</groupId>
 	<artifactId>parser</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>purejson</name>
@@ -154,7 +154,7 @@
     	<connection>scm:git:git://github.com/senthilganeshs/jsonp.git</connection>
     	<developerConnection>scm:git:senthilganeshs@github.com:jsonp/jsonp.git</developerConnection>
     	<url>https://github.com/senthilganeshs/jsonp</url>
-    	<tag>parser-1.0.1</tag>
+    	<tag>HEAD</tag>
     </scm>
 
 	<dependencies>
