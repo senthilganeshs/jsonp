@@ -123,6 +123,7 @@ The above code will generate the following json `[true,"string",[1,2]]`
 
 Used [fabienrenauds java-json-benchmark](https://github.com/fabienrenaud/java-json-benchmark) for capturing the throughputs comparing the javaxjson and jackson libraries and got below results for 1K payload.
 
+> Throughput tests computes the number of times the json parser was able to serialize/deserialize 1K payload in a second.
 
 |Benchmark                 |Mode |  Cnt|        Score|       Error|  Units|
 |--------------------------|-----|-----|-------------|------------|-------|
