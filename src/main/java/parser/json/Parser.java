@@ -343,12 +343,20 @@ public interface Parser {
         default Value isArray(final Consumer<Value> action) {
             return this;
         }
+        
+        default Value isArrayAt(final int index, final Consumer<Value> action) {
+            return this;
+        }
 
         default Value isNull(final Thunk action) {
             return this;
         }
 
         default Value isJSON(final BiConsumer<Value, Value> action) {
+            return this;
+        }
+        
+        default Value isJSONKey(final Value key, final Consumer<Value> action) {
             return this;
         }
 
@@ -425,6 +433,12 @@ public interface Parser {
                 map.entrySet().forEach(e -> action.accept(e.getKey(), e.getValue()));
                 return this;
             }
+            
+            @Override
+            public Value isJSONKey(final Value key, final Consumer<Value> action) {
+                action.accept(map.get(key));
+                return this;
+            }
         }
 
         final static class ArrayValue implements Value {
@@ -437,6 +451,14 @@ public interface Parser {
             @Override
             public Value isArray(final Consumer<Value> action) {
                 values.forEach(action);
+                return this;
+            }
+            
+            @Override
+            public Value isArrayAt(final int index, final Consumer<Value> action) {
+                if (index < 0 || index >= values.size()) 
+                    throw new IndexOutOfBoundsException("index out of range");
+                action.accept(values.get(index));
                 return this;
             }
         }
