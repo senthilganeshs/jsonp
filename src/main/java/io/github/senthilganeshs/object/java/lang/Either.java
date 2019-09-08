@@ -1,4 +1,4 @@
-package com.github.senthilganeshs.object.java.lang;
+package io.github.senthilganeshs.object.java.lang;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
