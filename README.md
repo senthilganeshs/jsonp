@@ -140,3 +140,14 @@ Used [fabienrenauds java-json-benchmark](https://github.com/fabienrenaud/java-js
 
 > The benchmarks were run on a lowerend VM and the numbers will vary if the same is run on more powerful box
 
+### Maven Dependency
+
+Want to give a try using the purejson parser, add the following to your pom.xml 
+
+```xml
+<dependency>
+    <groupId>io.github.senthilganeshs</groupId>
+    <artifactId>purejson</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
