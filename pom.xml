@@ -3,7 +3,7 @@
 
 	<groupId>io.github.senthilganeshs</groupId>
 	<artifactId>purejson</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>purejson</name>
@@ -154,7 +154,7 @@
     	<connection>scm:git:git://github.com/senthilganeshs/jsonp.git</connection>
     	<developerConnection>scm:git:senthilganeshs@github.com:jsonp/jsonp.git</developerConnection>
     	<url>https://github.com/senthilganeshs/jsonp</url>
-    	<tag>HEAD</tag>
+    	<tag>purejson-1.0.0</tag>
     </scm>
 
 	<dependencies>
