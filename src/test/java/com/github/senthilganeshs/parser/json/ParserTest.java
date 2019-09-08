@@ -1,14 +1,16 @@
-package parser.json;
+package com.github.senthilganeshs.parser.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.github.senthilganeshs.parser.json.Parser;
+import com.github.senthilganeshs.parser.json.Parser.JSONParserException;
+import com.github.senthilganeshs.parser.json.Parser.Value;
+import com.github.senthilganeshs.parser.json.ParserTest.Customer.Address.Builder.AddressBuilder;
+import com.github.senthilganeshs.parser.json.ParserTest.Customer.Cargo.Builder.CargoBuilder;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import parser.json.Parser.JSONParserException;
-import parser.json.Parser.Value;
-import parser.json.ParserTest.Customer.Address.Builder.AddressBuilder;
-import parser.json.ParserTest.Customer.Cargo.Builder.CargoBuilder;
 
 public class ParserTest extends TestCase {
 
@@ -378,12 +380,12 @@ public class ParserTest extends TestCase {
                 }
 
                 @Override
-                public parser.json.ParserTest.Customer.Address.Builder address() {
+                public com.github.senthilganeshs.parser.json.ParserTest.Customer.Address.Builder address() {
                     return addressBuilder;
                 }
 
                 @Override
-                public parser.json.ParserTest.Customer.Cargo.Builder cargo() {
+                public com.github.senthilganeshs.parser.json.ParserTest.Customer.Cargo.Builder cargo() {
                     return cargoBuilder;
                 }
 

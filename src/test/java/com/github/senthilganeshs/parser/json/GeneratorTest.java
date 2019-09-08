@@ -1,12 +1,14 @@
-package parser.json;
+package com.github.senthilganeshs.parser.json;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.github.senthilganeshs.parser.json.Generator;
+import com.github.senthilganeshs.parser.json.Parser.Value;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import parser.json.Parser.Value;
 
 public class GeneratorTest extends TestCase {
     

@@ -1,4 +1,4 @@
-package parser.json;
+package com.github.senthilganeshs.parser.json;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import object.java.lang.Either;
+import com.github.senthilganeshs.object.java.lang.Either;
 
 public interface Parser {
 

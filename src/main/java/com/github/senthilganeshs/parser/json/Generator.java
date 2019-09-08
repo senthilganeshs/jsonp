@@ -1,11 +1,11 @@
-package parser.json;
+package com.github.senthilganeshs.parser.json;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import parser.json.Parser.Value;
+import com.github.senthilganeshs.parser.json.Parser.Value;
 
 public interface Generator {
 
