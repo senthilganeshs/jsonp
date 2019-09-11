@@ -1,3 +1,5 @@
+![build](https://travis-ci.org/senthilganeshs/jsonp.svg?branch=master)
+
 ## Overview
 
 This project contains a simple JSON parser written in JAVA using only pure object oriented concepts. It was originally written for this [blog](https://Senthilganesh.hashnode.dev/yet-another-attempt-to-write-json-parser-cjzyzgxz5001nxls1sdx2cq56).
@@ -140,3 +142,14 @@ Used [fabienrenauds java-json-benchmark](https://github.com/fabienrenaud/java-js
 
 > The benchmarks were run on a lowerend VM and the numbers will vary if the same is run on more powerful box
 
+### Maven Dependency
+
+Want to give a try using the purejson parser, add the following to your pom.xml 
+
+```xml
+<dependency>
+    <groupId>io.github.senthilganeshs</groupId>
+    <artifactId>purejson</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
