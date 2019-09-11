@@ -12,22 +12,21 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 public class ParserTest extends TestCase {
-
+    
     public void testParserException() throws Exception {
-        Parser.create().parse(null)
+        Parser.streamParser().parse(null)
         .ifFailure(ParserTest::assertJSONParserException);
     }
 
 
     public void testNilValue() throws Exception {
-        Parser.create().parse("null")
+        Parser.streamParser().parse("null")
         .ifSuccess(v -> v
             .isNull(() -> Assert.assertTrue(true)));
     }
 
-
     public void testBoolValue() throws Exception {
-        final Parser parser = Parser.create();
+        final Parser parser = Parser.streamParser();
         parser.parse("true")
         .ifSuccess(v -> v
             .isBool(Assert::assertTrue));
@@ -38,7 +37,7 @@ public class ParserTest extends TestCase {
 
 
     public void testStringValue() throws Exception {
-        Parser.create().parse("\"hello\"")
+        Parser.streamParser().parse("\"hello\"")
         .ifSuccess(v -> v
             .isString(actual -> Assert.assertEquals("hello", actual))
             .isError(System.out::println))
@@ -46,7 +45,7 @@ public class ParserTest extends TestCase {
     }
 
     public void testIntegerValue() throws Exception {
-        Parser.create().parse("1011")
+        Parser.streamParser().parse("1011")
         .ifSuccess(v -> v
             .isInteger(i -> Assert.assertEquals(1011, i.intValue())))
         .ifFailure(e -> Assert.assertFalse("Expected int. Reason " + e.getLocalizedMessage(), true));
@@ -55,7 +54,7 @@ public class ParserTest extends TestCase {
 
     public void testArrayValue() throws Exception {
         final String document = "[null,\"string\",true]";
-        Parser.create().parse(document)
+        Parser.streamParser().parse(document)
         .ifSuccess(v -> v
             .isArray(_v -> 
             _v.isString(str -> System.out.println(str + " is a string"))
@@ -67,7 +66,7 @@ public class ParserTest extends TestCase {
 
 
     public void testNestedArrayValue() throws Exception {
-        Parser.create().parse("[null,[true,false],\"string\"]")
+        Parser.streamParser().parse("[null,[true,false],\"string\"]")
         .ifSuccess(v -> v
             .isArray(_v -> _v
                 .isNull(() -> System.out.println("null value"))
@@ -76,7 +75,7 @@ public class ParserTest extends TestCase {
                 .isString(str -> System.out.println(str + " is a string"))))
         .ifFailure(System.out::println);
 
-        Parser.create().parse("[[true, false],[null, false]]")
+        Parser.streamParser().parse("[[true, false],[null, false]]")
         .ifSuccess(v -> v
             .isArray(_v -> _v
                 .isArray(__v -> __v
@@ -84,15 +83,25 @@ public class ParserTest extends TestCase {
                     .isNull(()-> System.out.println("empty")))));
     }
 
-
+    
+    public void testInvalidKey() throws Exception {
+        Parser.streamParser().parse("{"
+            + "1011 : true"
+            + "}").ifSuccess(v -> v
+                .isJSON((k, _v) -> 
+                k.isError(err -> Assert.assertTrue(
+                    "key should be string type", 
+                    err.equals("key cannot be non string type.")))))
+        .ifFailure(System.out::println);
+    }
 
     public void testJSONValue() throws Exception { 
 
-        Parser.create().parse(
+        Parser.streamParser().parse(
             "{" +
-                "name : \"Senthil\"," + 
-                "Employed : true," +
-                "favourites : [\"TDD\", \"OOPS\"]" + 
+                "\"name\" : \"Senthil\"," + 
+                "\"Employed\" : true," +
+                "\"favourites\" : [\"TDD\", \"OOPS\"]" + 
             "}")
         .ifSuccess(v -> v
             .isJSON((k, _v) -> _v
@@ -106,7 +115,7 @@ public class ParserTest extends TestCase {
 
     public void testJSONArray() throws Exception {
 
-        Parser.create().parse("["
+        Parser.streamParser().parse("["
             + "{ \"name\" :\"Arun\","
             + "  \"age\"  : 10"
             + "}, {"
@@ -129,7 +138,7 @@ public class ParserTest extends TestCase {
 
 
     public void testJSONToObject() throws Exception {
-        Parser.create().parse("{" + 
+        Parser.streamParser().parse("{" + 
             "  \"name\" : \"Senthil\"," + 
             "  \"address\" : {" + 
             "    \"flatNumber\" : \"#1011\"," + 

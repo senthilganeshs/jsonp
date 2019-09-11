@@ -16,7 +16,11 @@ public interface Parser {
 
     Either<Value, JSONParserException> parse(final String document);
 
-    public static Parser create() {
+    public static Parser streamParser() {
+        return StreamParser.streamParser();
+    }
+    
+    public static Parser simple() {
         return new Simple();
     }
 
