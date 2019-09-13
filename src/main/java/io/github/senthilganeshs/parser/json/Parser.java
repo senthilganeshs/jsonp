@@ -1,5 +1,9 @@
 package io.github.senthilganeshs.parser.json;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +19,25 @@ import io.github.senthilganeshs.object.java.lang.Either;
 public interface Parser {
 
     Either<Value, JSONParserException> parse(final String document);
+    
+    default Either<Value, JSONParserException> parse (final InputStream stream) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(stream))) {
+            String line = null;
+            final StringBuilder document = new StringBuilder();
+            do {
+                try {
+                    line = in.readLine();
+                    if (line != null)
+                        document.append(line);
+                } catch (IOException e) {
+                    break;
+                }
+            } while (line != null);
+            return parse(document.toString());
+        } catch (IOException e1) {
+            return Either.fail(new JSONParserException(e1));
+        }
+    }
 
     public static Parser streamParser() {
         return StreamParser.streamParser();
@@ -22,6 +45,10 @@ public interface Parser {
     
     public static Parser simple() {
         return new Simple();
+    }
+    
+    public static Parser create() {
+        return streamParser(); //default is streamparser
     }
 
     final static class Simple implements Parser {

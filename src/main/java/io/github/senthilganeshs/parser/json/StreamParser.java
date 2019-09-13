@@ -1,5 +1,8 @@
 package io.github.senthilganeshs.parser.json;
 
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,22 +31,33 @@ public interface StreamParser {
 
         @Override
         public Either<Value, JSONParserException> parse(final String document) {
-            
-            if (document == null || document.isEmpty()) {
-                return Either.fail(new JSONParserException("empty json"));
-            }
-            
-            final ByteReader reader = new ByteReader.StringByteReader(document);
-            return 
+
+            if (document == null || document.isEmpty()) { return Either.fail(new
+                JSONParserException("empty json")); }
+
+            final ByteReader reader = new ByteReader.StringByteReader(document); return
                 Either.succ(new StreamParser() {
-                    @Override
-                    public Value consume(final ByteReader reader) {
-                        final AtomicReference<Value> val = new AtomicReference<>();
-                        reader.skipAll(Character::isWhitespace); //skip leading whitespace.
-                        reader.read(i->true, ch -> val.set(all(ch).consume(reader)));
-                        return val.get();
-                    }
+
+                    @Override public Value consume(final ByteReader reader) { final
+                        AtomicReference<Value> val = new AtomicReference<>();
+                    reader.skipAll(Character::isWhitespace); //skip leading whitespace.
+                    reader.read(i->true, ch -> val.set(all(ch).consume(reader))); return val.get(); }
                 }.consume(reader));
+
+        }
+        
+        @Override
+        public Either<Value, JSONParserException> parse (final InputStream stream) {
+            final ByteReader reader = new ByteReader.StreamByteReader(stream);
+            return Either.succ(new StreamParser() {
+                @Override
+                public Value consume(final ByteReader reader) {
+                    final AtomicReference<Value> val = new AtomicReference<>();
+                    reader.skipAll(Character::isWhitespace); //skip leading whitespace.
+                    reader.read(i->true, ch -> val.set(all(ch).consume(reader)));
+                    return val.get();
+                }
+            }.consume(reader));
         }
     }
     
@@ -54,6 +68,106 @@ public interface StreamParser {
         ByteReader skipOne (final Predicate<Character> cond);
         
         ByteReader skipAll (final Predicate<Character> cond);
+        
+        final static class StreamByteReader implements ByteReader {
+
+            private final InputStream reader;
+            
+            private final byte[] buf;
+            
+            private final int BUF_SIZE = 8192;
+            
+            private int last;
+            
+            private int cursor;
+
+            public StreamByteReader(final InputStream is) {
+                this.reader = is;
+                this.buf = new byte[BUF_SIZE];
+                this.cursor = 0;
+                try {
+                    this.last = is.read(buf, 0 , BUF_SIZE);
+                } catch (IOException e) {
+                    this.last = -1;
+                }
+            }
+
+            @Override
+            public ByteReader read(final Predicate<Character> cond, final Consumer<Character> action) {
+                while (last != -1) {
+                    if (cond.test((char) buf[cursor])) {
+                        ((Consumer<Character>) ch -> {
+                            try {
+                                if (cursor == last -1) {
+                                    if (last == BUF_SIZE) {
+                                        last = reader.read(buf, 0, BUF_SIZE);
+                                    } else {
+                                        last = reader.read(buf, last, BUF_SIZE - last);
+                                    }
+                                    cursor = 0;
+                                } else {
+                                    cursor ++;
+                                }
+                            } catch (IOException e) {
+                                last = -1;
+                            }
+                            action.accept(ch);
+                        }).accept((char) buf[cursor]);
+                    } else {
+                        break;
+                    }
+                }
+                return this;
+            }
+
+            @Override
+            public ByteReader skipOne(final Predicate<Character> cond) {
+                if (last != -1 && cond.test((char) buf[cursor])) {
+                    try {
+                        if (cursor == last -1) {
+                            if (last == BUF_SIZE) {
+                                last = reader.read(buf, 0, BUF_SIZE);
+                            } else {
+                                last = reader.read(buf, last, BUF_SIZE - last);
+                            }
+                            cursor = 0;
+                        } else {
+                            cursor ++;
+                        }
+                    } catch (IOException e) {
+                        last = -1;
+                    }                
+                }
+                return this;
+            }
+
+            @Override
+            public ByteReader skipAll(final Predicate<Character> cond) {
+                try {
+                    while (last != -1) {
+                        if (cond.test((char) buf[cursor])) {
+                            if (cursor == last -1) {
+                                if (last == BUF_SIZE) {
+                                    last = reader.read(buf, 0, BUF_SIZE);
+                                } else {
+                                    last = reader.read(buf, last, BUF_SIZE - last);
+                                }
+                                cursor = 0;
+                            } else {
+                                cursor ++;
+                            }                
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                catch(IOException e) {
+                    last = -1;
+                }
+                return this;
+            }
+            
+        }
         
         final static class StringByteReader implements ByteReader {
 

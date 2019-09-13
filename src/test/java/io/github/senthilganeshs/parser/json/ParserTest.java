@@ -1,7 +1,10 @@
 package io.github.senthilganeshs.parser.json;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 import io.github.senthilganeshs.parser.json.Parser;
 import io.github.senthilganeshs.parser.json.Parser.JSONParserException;
@@ -14,7 +17,7 @@ import junit.framework.TestCase;
 public class ParserTest extends TestCase {
     
     public void testParserException() throws Exception {
-        Parser.streamParser().parse(null)
+        Parser.streamParser().parse((String)null)
         .ifFailure(ParserTest::assertJSONParserException);
     }
 
