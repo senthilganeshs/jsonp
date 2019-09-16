@@ -135,4 +135,4 @@ The above code will generate the following json `[true,"string",[1,2]]`
 
 ### Performance Benchmarks
 
-Working with [fabienrenauds java-json-benchmark](https://github.com/fabienrenaud/java-json-benchmark) for benchmarking results.
+[fabienrenauds java-json-benchmark](https://github.com/fabienrenaud/java-json-benchmark/pull/29) has results of purejson compared against top json parsers
