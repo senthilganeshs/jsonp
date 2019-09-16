@@ -4,35 +4,41 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import io.github.senthilganeshs.parser.json.Generator;
-import io.github.senthilganeshs.parser.json.Parser.Value;
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
-public class GeneratorTest extends TestCase {
+import io.github.senthilganeshs.parser.json.Parser.Value;
+
+public class GeneratorTest {
     
+    @Test
     public void testEmptyJSON() throws Exception {
-        Assert.assertEquals("null", Generator.create().generate(Value.nil()));
+        AssertJUnit.assertEquals("null", Generator.create().generate(Value.nil()));
     }
     
+    @Test
     public void testStringJSON() throws Exception {
-        Assert.assertEquals("\"hello\"", Generator.create().generate(Value.string("hello")));
+        AssertJUnit.assertEquals("\"hello\"", Generator.create().generate(Value.string("hello")));
     }
     
+    @Test
     public void testIntegerJSON() throws Exception {
-        Assert.assertEquals("1011", Generator.create().generate(Value.integer(1011)));
+        AssertJUnit.assertEquals("1011", Generator.create().generate(Value.integer(1011)));
     }
     
+    @Test
     public void testDoubleJSON() throws Exception {
-        Assert.assertEquals("10.234", Generator.create().generate(Value.number(10.234)));
+        AssertJUnit.assertEquals("10.234", Generator.create().generate(Value.number(10.234)));
     }
     
+    @Test
     public void testBoolJSON() throws Exception {
-        Assert.assertEquals("false", Generator.create().generate(Value.bool(false)));
+        AssertJUnit.assertEquals("false", Generator.create().generate(Value.bool(false)));
     }
     
+    @Test
     public void testArrayJSON() throws Exception {
-        Assert.assertEquals(
+        AssertJUnit.assertEquals(
             "[true,\"string\",[1,2]]",
             Generator.create().generate(
                 Value.arr(Arrays.asList(
@@ -43,6 +49,7 @@ public class GeneratorTest extends TestCase {
                         Value.integer(2)))))));
     }
     
+    @Test
     public void testObjectJSON() throws Exception {
         
         final Map<Value, Value> map = new LinkedHashMap<>();
@@ -61,7 +68,7 @@ public class GeneratorTest extends TestCase {
         map.put(Value.string("address"), Value.json(address));
         map.put(Value.string("cargo"), Value.json(cargo));
         
-        Assert.assertEquals(
+        AssertJUnit.assertEquals(
              "[{\"name\":\"Senthil\","
             + "\"address\":{"
             + "\"flatNumber\":1011,"

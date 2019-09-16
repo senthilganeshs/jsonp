@@ -37,28 +37,41 @@ public interface StreamParser {
 
             final ByteReader reader = new ByteReader.StringByteReader(document); return
                 Either.succ(new StreamParser() {
-
-                    @Override public Value consume(final ByteReader reader) { final
-                        AtomicReference<Value> val = new AtomicReference<>();
-                    reader.skipAll(Character::isWhitespace); //skip leading whitespace.
-                    reader.read(i->true, ch -> val.set(all(ch).consume(reader))); return val.get(); }
+                    private boolean notEscapeChar(final char ch) {
+                        return !escapeChar(ch);
+                    }
+                    @Override 
+                    public Value consume(final ByteReader reader) { 
+                        final AtomicReference<Value> val = new AtomicReference<>();
+                        reader.skipAll(Character::isWhitespace); //skip leading whitespace.
+                        skipEscapeChars(reader);
+                        reader.read(this::notEscapeChar, ch -> val.set(all(ch).consume(reader))); 
+                        return val.get(); 
+                     }
                 }.consume(reader));
-
         }
         
         @Override
         public Either<Value, JSONParserException> parse (final InputStream stream) {
             final ByteReader reader = new ByteReader.StreamByteReader(stream);
             return Either.succ(new StreamParser() {
+                private boolean notEscapeChar(final char ch) {
+                    return !escapeChar(ch);
+                }
                 @Override
                 public Value consume(final ByteReader reader) {
                     final AtomicReference<Value> val = new AtomicReference<>();
                     reader.skipAll(Character::isWhitespace); //skip leading whitespace.
-                    reader.read(i->true, ch -> val.set(all(ch).consume(reader)));
+                    skipEscapeChars(reader);
+                    reader.read(this::notEscapeChar, ch -> val.set(all(ch).consume(reader)));
                     return val.get();
                 }
             }.consume(reader));
-        }
+        }       
+    }
+    
+    static boolean escapeChar(final char ch) {
+        return (ch == '\b' || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t'  || ch =='\\');
     }
     
     interface ByteReader {
@@ -100,11 +113,12 @@ public interface StreamParser {
                             try {
                                 if (cursor == last -1) {
                                     if (last == BUF_SIZE) {
-                                        last = reader.read(buf, 0, BUF_SIZE);
+                                        cursor = 0;
+                                        last = reader.read(buf, 0, BUF_SIZE);                                        
                                     } else {
-                                        last = reader.read(buf, last, BUF_SIZE - last);
-                                    }
-                                    cursor = 0;
+                                        cursor = last;
+                                        last += reader.read(buf, last, BUF_SIZE - last);
+                                    }                                    
                                 } else {
                                     cursor ++;
                                 }
@@ -122,15 +136,16 @@ public interface StreamParser {
 
             @Override
             public ByteReader skipOne(final Predicate<Character> cond) {
-                if (last != -1 && cond.test((char) buf[cursor])) {
+                if (last != -1 && cursor < last && cond.test((char) buf[cursor])) {
                     try {
                         if (cursor == last -1) {
                             if (last == BUF_SIZE) {
-                                last = reader.read(buf, 0, BUF_SIZE);
+                                cursor = 0;
+                                last = reader.read(buf, 0, BUF_SIZE);                                
                             } else {
-                                last = reader.read(buf, last, BUF_SIZE - last);
-                            }
-                            cursor = 0;
+                                cursor = last;
+                                last += reader.read(buf, last, BUF_SIZE - last);
+                            }                            
                         } else {
                             cursor ++;
                         }
@@ -148,11 +163,12 @@ public interface StreamParser {
                         if (cond.test((char) buf[cursor])) {
                             if (cursor == last -1) {
                                 if (last == BUF_SIZE) {
-                                    last = reader.read(buf, 0, BUF_SIZE);
+                                    cursor = 0;
+                                    last = reader.read(buf, 0, BUF_SIZE);                                    
                                 } else {
-                                    last = reader.read(buf, last, BUF_SIZE - last);
-                                }
-                                cursor = 0;
+                                    cursor = last;
+                                    last += reader.read(buf, last, BUF_SIZE - last);                                    
+                                }                                
                             } else {
                                 cursor ++;
                             }                
@@ -181,7 +197,7 @@ public interface StreamParser {
             
             @Override
             public ByteReader skipOne (final Predicate<Character> cond) {
-                if (cond.test(document.charAt(cursor))) {
+                if (cursor < document.length() && cond.test(document.charAt(cursor))) {
                     cursor ++;                    
                 }
                 return this;
@@ -257,11 +273,11 @@ public interface StreamParser {
             bld.append(first);
             final AtomicBoolean isNumber = new AtomicBoolean(false);
             reader.read(
-                (ch -> Character.isDigit(ch) || ch =='.' || ch == 'e' || ch == '+'),
+                (ch -> Character.isDigit(ch) || ch =='.' || ch == 'e' || ch == '+' || ch =='-'),
                 ch -> {
                     if (Character.isDigit(ch)) {
                         bld.append(ch);
-                    } else if (ch == '.' || ch == 'e' ||ch == '+' ) {
+                    } else if (ch == '.' || ch == 'e' ||ch == '+' || ch == '-') {
                         isNumber.set(true);
                         bld.append(ch);
                     }
@@ -286,6 +302,12 @@ public interface StreamParser {
     
     static Value primitive (final char ch, final ByteReader reader) {
         return primitive (ch).consume(reader);
+    }
+    
+    static void skipEscapeChars(final ByteReader reader) {
+        //FIXME: need to skip \/ \u0000
+        reader.skipAll(StreamParser::escapeChar);
+        
     }
     
     final static class ArrayParser implements StreamParser {
@@ -374,7 +396,10 @@ public interface StreamParser {
         @Override
         public Value consume(final ByteReader reader) {
             final StringBuilder value = new StringBuilder();
-            reader.read(ch -> ch != '"', value::append);
+            reader.read(ch -> {
+                skipEscapeChars(reader);                
+                return ch != '"';
+            }, value::append);
             reader.skipOne(ch -> ch == '"'); //skip one double quote
             return Value.string(value.toString());
         }
