@@ -4,6 +4,18 @@
 
 This project contains a simple JSON parser written in JAVA using only pure object oriented concepts. It was originally written for this [blog](https://Senthilganesh.hashnode.dev/yet-another-attempt-to-write-json-parser-cjzyzgxz5001nxls1sdx2cq56).
 
+### Maven Dependency
+
+Want to give a try using the purejson parser, add the following to your pom.xml 
+
+```xml
+<dependency>
+    <groupId>io.github.senthilganeshs</groupId>
+    <artifactId>purejson</artifactId>
+    <version>1.0.1</version>
+</dependency>
+```
+
 ### Parser
 Parser accepts a json string and returns an Either which indicates presence of a value (ifSuccess) or an exception (ifFailure). 
 
@@ -123,33 +135,4 @@ The above code will generate the following json `[true,"string",[1,2]]`
 
 ### Performance Benchmarks
 
-Used [fabienrenauds java-json-benchmark](https://github.com/fabienrenaud/java-json-benchmark) for capturing the throughputs comparing the javaxjson and jackson libraries and got below results for 1K payload.
-
-> Throughput tests computes the number of times the json parser was able to serialize/deserialize 1K payload in a second.
-
-|Benchmark                 |Mode |  Cnt|        Score|       Error|  Units|
-|--------------------------|-----|-----|-------------|------------|-------|
-|Serialization.jackson     |thrpt|   20|  1918864.757| ± 16596.648|  ops/s|
-|Serialization.javaxjson   |thrpt|   20|     5759.119| ±   185.636|  ops/s|
-|**Serialization.purejson**  |thrpt|   20|   **157615.118**| ±  1421.514|  ops/s|
-
-
-|Benchmark                 |Mode | Cnt |        Score|       Error|  Units|
-|--------------------------|-----|-----|-------------|------------|-------|
-|Deserialization.jackson   |thrpt|   20|  1395004.807| ± 14245.110|  ops/s|
-|Deserialization.javaxjson |thrpt|   20|    32616.807| ±   379.452|  ops/s|
-|**Deserialization.purejson**|thrpt|   20|    **48032.698**| ±   721.215|  ops/s|
-
-> The benchmarks were run on a lowerend VM and the numbers will vary if the same is run on more powerful box
-
-### Maven Dependency
-
-Want to give a try using the purejson parser, add the following to your pom.xml 
-
-```xml
-<dependency>
-    <groupId>io.github.senthilganeshs</groupId>
-    <artifactId>purejson</artifactId>
-    <version>1.0.0</version>
-</dependency>
-```
+[fabienrenauds java-json-benchmark](https://github.com/fabienrenaud/java-json-benchmark/pull/29) has results of purejson compared against top json parsers
